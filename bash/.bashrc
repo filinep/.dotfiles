@@ -3,12 +3,14 @@ alias grep='grep --color=auto'
 alias more='less'
 alias mkdir='mkdir -p -v'
 alias ping='ping -c 5'
-alias nano='nano -c'
+alias nano='nano -w -c'
 alias ps='ps -elf'
 alias ls='ls -hF --color=always'
 
+alias openports='netstat --all --numeric --programs --inet --inet6'
+
 alias chat='urxvt -e weechat'
-alias calc='python2 -i -c "from math import *"'
+alias calc='python2 -i -c "from math import *; from matplotlib import pyplot as plot"'
 
 # Get color support for 'less'
 export LESS="--RAW-CONTROL-CHARS"
@@ -16,7 +18,18 @@ export LESS="--RAW-CONTROL-CHARS"
 # Use colors for less, man, etc.
 . ~/.dotfiles/bash/.LESS_TERMCAP
 
+# safety features
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -I'                    # 'rm -i' prompts for every file
+alias ln='ln -i'
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
 shopt -s autocd
+
+TERM=rxvt-unicode
 
 case $TERM in
     screen*)
@@ -45,6 +58,7 @@ if [ -n "$DISPLAY" ]; then
 else
 	BROWSER=links
 fi
+ALTERNATE_EDITOR=""
 EDITOR=emacs
 PAGER=less
 
@@ -66,5 +80,11 @@ export SCALA_HOME=/usr/share/scala
 
 export PATH=$currentjava/bin:~/local/bin:$(ruby -rubygems -e "puts Gem.user_dir")/bin:$PATH:~/local/android-sdk-linux/tools
 
+if [ -f ~/.proxy ]; then
+    . ~/.proxy
+fi
+
 clear
 ~/.dotfiles/bash/space_invaders
+
+unset SSH_ASKPASS
