@@ -144,7 +144,7 @@ screens = [
                     '%a %d %b %H:%M', fontsize=14, **default_data
                 ),
                 #DrawerWidget()
-            ], 28, background="333333"
+            ], 28, background="2e3436"
         )
     ),
     Screen(
@@ -160,7 +160,7 @@ screens = [
                     highlight_method='block',
                     **default_data
                 )
-            ], 28, background="333333"
+            ], 28, background="2e3436"
         )
     )
 ]
