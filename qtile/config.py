@@ -3,6 +3,10 @@ from libqtile.command import lazy
 from libqtile.widget import base
 from libqtile import layout, bar, widget, drawer, hook
 
+import shlex
+
+term = 'urxvt -e bash -c "tmux -q has-session && exec tmux attach-session -d || exec tmux new-session"'
+
 mod = "mod4"
 alt = "mod1"
 ctrl = "control"
@@ -49,7 +53,7 @@ keys = [
 
     # Shortcuts
     Key([], 'F1', lazy.screen[0].togglegroup('terminal')),
-    Key([mod], "Return", lazy.spawn("urxvt -e tmux")),
+    Key([mod], "Return", lazy.spawn(term)),
 
     # Toggle between different layouts as defined below
     Key([mod, alt], "Tab", lazy.nextlayout()),
@@ -142,8 +146,7 @@ screens = [
                 ), 
                 widget.Clock(
                     '%a %d %b %H:%M', fontsize=14, **default_data
-                ),
-                #DrawerWidget()
+                )
             ], 28, background="2e3436"
         )
     ),
@@ -200,5 +203,5 @@ auto_fullscreen = True
 @hook.subscribe.startup          
 def runner():
     import subprocess
-    subprocess.Popen(['urxvt', '-e', 'tmux'])
+    subprocess.Popen(shlex.split(term))
 

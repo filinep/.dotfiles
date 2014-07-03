@@ -29,7 +29,7 @@ alias chgrp='chgrp --preserve-root'
 
 shopt -s autocd
 
-TERM=rxvt-unicode
+[ -n "$TMUX" ] && export TERM=screen-256color || TERM=rxvt-unicode
 
 case $TERM in
     screen*)
