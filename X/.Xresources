@@ -14,7 +14,7 @@ URxvt.keysym.Control-Down:  \033[1;5B
 URxvt.keysym.Control-Left:  \033[1;5D
 URxvt.keysym.Control-Right: \033[1;5C
 
-URxvt*termName: screen-256color
+URxvt*termName:                       screen-256color
 ! URxvt*geometry:                       geometry
 ! URxvt*chdir:                          string
 ! URxvt*reverseVideo:                   boolean

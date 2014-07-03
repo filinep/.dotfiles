@@ -200,8 +200,7 @@ mouse = [
 
 auto_fullscreen = True
 
-@hook.subscribe.startup          
+@hook.subscribe.startup
 def runner():
     import subprocess
     subprocess.Popen(shlex.split(term))
-
