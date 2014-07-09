@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from libqtile.config import Key, Screen, Group, Match, Drag, Click
 from libqtile.command import lazy
 from libqtile.widget import base
@@ -11,6 +12,11 @@ mod = "mod4"
 alt = "mod1"
 ctrl = "control"
 shft = "shift"
+
+follow_focus = False
+border_normal = "#ff00ff"
+border_focus = "#00ff00"
+border_width = 3
 
 # def make_submap(sm):
 #     def sm_closure(qt):
@@ -52,31 +58,32 @@ keys = [
     #Key([mod, shft, 'control'], 'q', lazy.spawn('gnome-session-quit --power-off')),
 
     # Shortcuts
-    Key([], 'F1', lazy.screen[0].togglegroup('terminal')),
+    Key([], 'F1', lazy.screen[0].togglegroup('')),
     Key([mod], "Return", lazy.spawn(term)),
 
-    # Toggle between different layouts as defined below
     Key([mod, alt], "Tab", lazy.nextlayout()),
 
     Key([mod], "Prior", lazy.screen.prevgroup()),
     Key([mod], "Next", lazy.screen.nextgroup()),
     
-    Key([alt], "F4", lazy.window.kill()), # Close window
-    Key([mod, ctrl], "r", lazy.restart()), # Reload qtile settings
-    Key([mod], "space", lazy.spawncmd('run')), # open program
+    Key([alt], "F4", lazy.window.kill()),
+    Key([mod, ctrl], "r", lazy.restart()),
+    Key([mod], "space", lazy.spawncmd('run')),
     Key([mod], "F12", lazy.window.toggle_fullscreen()),
 ]
 
 default_data = dict(
     foreground="00ccff",
-    font="DejaVu Sans"
+    #font="DejaVu Sans"
+    font="FontAwesome"
 )
 
 groups = [
-    Group("home", matches=[Match(wm_class=["Firefox"])], screen_affinity=1),
-    Group("editor", matches=[Match(wm_class=["Emacs"])], screen_affinity=0),
-    Group("terminal", matches=[Match(title=["Terminal"])], screen_affinity=1),
-    Group("other")
+    Group("", matches=[Match(wm_class=["Firefox"])]),
+    Group("", matches=[Match(wm_class=["Emacs"])]),
+    Group("", matches=[Match(title=["Terminal"])]),
+    Group("", matches=[Match(wm_class=["Xchat"])]),
+    Group("")
 ]
 
 for index, grp in enumerate(groups):
@@ -90,13 +97,13 @@ dgroups_app_rules = []
 
 border = dict(
     border_normal='#000000',
-    border_focus='#edd400',
+    border_focus='#00ccff',
     border_width=1,
 )
 
 layouts = [
     layout.Max(),
-    layout.MonadTall(ratio=0.8),
+    layout.MonadTall(ratio=0.8, **border),
     layout.Stack(**border)
 ]
 
@@ -117,12 +124,14 @@ screens = [
             [
                 widget.GroupBox(
                     invert_mouse_wheel=True,
-                    borderwidth=1, 
                     active='00ccff', 
                     inactive='0055aa', 
-                    this_current_screen_border='000000', 
-                    fontsize=12, 
+                    this_current_screen_border='0077aa', 
+                    other_screen_border='555555', 
+                    this_screen_border='202020', 
+                    fontsize=16, 
                     highlight_method='block',
+                    urgent_alert_method='text',
                     **default_data
                 ),
                 widget.Sep(),
@@ -155,14 +164,20 @@ screens = [
             [
                 widget.GroupBox(
                     invert_mouse_wheel=True,
-                    borderwidth=1, 
                     active='00ccff', 
                     inactive='0055aa', 
-                    this_current_screen_border='000000', 
-                    fontsize=12, 
+                    this_current_screen_border='0077aa', 
+                    other_screen_border='555555', 
+                    this_screen_border='202020', 
+                    fontsize=16, 
                     highlight_method='block',
+                    urgent_alert_method='text',
                     **default_data
-                )
+                ),
+                widget.Sep(),
+                widget.WindowName(
+                    width=bar.STRETCH, fontsize=14, **default_data
+                ),
             ], 28, background="2e3436"
         )
     )
