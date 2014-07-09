@@ -58,7 +58,7 @@ keys = [
     #Key([mod, shft, 'control'], 'q', lazy.spawn('gnome-session-quit --power-off')),
 
     # Shortcuts
-    Key([], 'F1', lazy.screen[0].togglegroup('')),
+    Key([], 'F1', lazy.screen[0].togglegroup('')),
     Key([mod], "Return", lazy.spawn(term)),
 
     Key([mod, alt], "Tab", lazy.nextlayout()),
