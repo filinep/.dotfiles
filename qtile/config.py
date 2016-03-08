@@ -32,6 +32,7 @@ groups = [
     Group('', matches=[Match(wm_class=['Firefox'])]),
     Group('', matches=[Match(wm_class=['Emacs'])]),
     Group('', matches=[Match(title=['Terminal'])]),
+    Group('', matches=[Match(title=['Mozilla Thunderbird'])]),
     Group('', matches=[Match(wm_class=['Xchat'])]),
     Group('')
 ]
@@ -56,13 +57,18 @@ keys = [
     Key([mod, ctrl], 'q', lazy.shutdown()),
     Key([], 'F1', lazy.screen[0].togglegroup('')),
     Key([mod], 'Return', lazy.spawn(term)),
-    Key([mod, alt], 'Tab', lazy.nextlayout()),
+    Key([mod, alt], 'Tab', lazy.next_layout()),
     Key([mod], 'Prior', lazy.screen.prevgroup()),
     Key([mod], 'Next', lazy.screen.nextgroup()),
     Key([alt], 'F4', lazy.window.kill()),
     Key([mod, ctrl], 'r', lazy.restart()),
     Key([mod], 'space', lazy.spawncmd('run')),
     Key([mod], 'F12', lazy.window.toggle_fullscreen()),
+    Key([], 'XF86MonBrightnessDown', lazy.spawn('sudo /home/filipe/local/bin/backlight dec')),
+    Key([], 'XF86MonBrightnessUp', lazy.spawn('sudo /home/filipe/local/bin/backlight inc')),
+    Key([], 'XF86AudioLowerVolume', lazy.spawn('amixer set Master playback 5-')),
+    Key([], 'XF86AudioRaiseVolume', lazy.spawn('amixer set Master playback 5+')),
+    Key([], 'XF86AudioMute', lazy.spawn('amixer set Master toggle')),
 ]
 
 for index, grp in enumerate(groups):
@@ -94,7 +100,7 @@ floating_layout = layout.Floating(auto_float_types=[
 ################################################################################
 class CloseWindow(base._TextBox):
     def __init__(self, **config):
-        base._TextBox.__init__(self, text='x', width=bar.CALCULATED, **config)
+        base._TextBox.__init__(self, text='X', width=bar.CALCULATED, **config)
 
     def _configure(self, qtile, bar):
         base._TextBox._configure(self, qtile, bar)
@@ -140,11 +146,13 @@ screens = [
                 widget.Systray(
                     **default_data
                 ),
+                widget.BatteryIcon(theme_path='/home/filipe/.config/qtile/battery/', **default_data),
+                #widget.Battery(**default_data),
                 widget.Volume(
-                    theme_path='/home/filipe/.config/qtile/', **default_data
-                ), 
+                    theme_path='/home/filipe/.config/qtile/audio/', **default_data
+                ),
                 widget.Clock(
-                    '%a %d %b %H:%M', fontsize=15, **default_data
+                    format='%a %d %b %H:%M', fontsize=15, **default_data
                 )
             ], 28, background='#2e3436'
         )
