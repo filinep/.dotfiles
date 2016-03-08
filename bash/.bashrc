@@ -10,7 +10,8 @@ alias ls='ls -hF --color=always'
 alias openports='netstat --all --numeric --programs --inet --inet6'
 
 alias chat='urxvt -e weechat'
-alias calc='python2 -i -c "from math import *; from matplotlib import pyplot as plot"'
+alias calc='python2 -i -c "from math import *; from matplotlib import pyplot as plot; from scipy import *"'
+alias ssh='TERM=rxvt ssh'
 
 # Get color support for 'less'
 export LESS="--RAW-CONTROL-CHARS"
@@ -70,15 +71,10 @@ export PAGER
 export PYTHONDOCS=/usr/share/doc/python2/html/
 
 # Java stuff
-export java7=/usr/lib/jvm/java-7-openjdk
-export java6=~/local/jdk1.6.0_34
-export java8=~/local/jdk1.8.0
-export currentjava=$java7
-export JAVA_HOME=$currentjava/jre
 export _JAVA_AWT_WM_NONREPARENTING=1
 export SCALA_HOME=/usr/share/scala
 
-export PATH=$currentjava/bin:~/local/bin:$(ruby -rubygems -e "puts Gem.user_dir")/bin:$PATH:~/local/android-sdk-linux/tools
+export PATH=~/local/bin:$PATH
 
 if [ -f ~/.proxy ]; then
     . ~/.proxy

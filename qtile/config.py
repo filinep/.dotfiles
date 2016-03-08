@@ -64,6 +64,7 @@ keys = [
     Key([mod, ctrl], 'r', lazy.restart()),
     Key([mod], 'space', lazy.spawncmd('run')),
     Key([mod], 'F12', lazy.window.toggle_fullscreen()),
+    Key([alt], 'grave', lazy.window.bring_to_front()),
     Key([], 'XF86MonBrightnessDown', lazy.spawn('sudo /home/filipe/local/bin/backlight dec')),
     Key([], 'XF86MonBrightnessUp', lazy.spawn('sudo /home/filipe/local/bin/backlight inc')),
     Key([], 'XF86AudioLowerVolume', lazy.spawn('amixer set Master playback 5-')),
@@ -82,8 +83,8 @@ for index, grp in enumerate(groups):
 ## Layouts
 ################################################################################
 layouts = [
-    layout.Max(),
-    layout.Stack(),
+    layout.Max(margin=1),
+    layout.Stack(margin=1),
 ]
 
 floating_layout = layout.Floating(auto_float_types=[
@@ -222,6 +223,8 @@ def fake_single_window_focus(win):
             if s.group:
                 for i in s.group.windows:
                     i.place(i.x, i.y, i.width, i.height, border_width, None)
+    if hasattr(win, 'floating') and win.floating: # make floaties auto come to the front
+        win.cmd_bring_to_front()
 
 
 ################################################################################
