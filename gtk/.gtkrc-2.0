@@ -26,3 +26,4 @@
 gtk-theme-name="FlatStudioDark"
 gtk-font-name = "DejaVu Sans 11"
 gtk-icon-theme-name = "Flattr"
+gtk-key-theme-name = "Emacs"

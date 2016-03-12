@@ -16,3 +16,4 @@ xsetroot -cursor_name left_ptr
 numlockx &
 
 XDG_CURRENT_SESSION=qtile exec qtile
+#XDG_CURRENT_SESSION=qtile exec x11trace /usr/bin/qtile -c ~/.config/qtile/config.py > ~/qtile-xtrace.log
