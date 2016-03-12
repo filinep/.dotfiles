@@ -83,4 +83,5 @@ fi
 clear
 ~/.dotfiles/bash/space_invaders
 
+export QT_STYLE_OVERRIDE=GTK+
 unset SSH_ASKPASS
