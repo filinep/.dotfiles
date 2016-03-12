@@ -2,9 +2,9 @@
 from libqtile.config import Key, Screen, Group, Match, Drag, Click
 from libqtile.command import lazy
 from libqtile.widget import base
-from libqtile import layout, bar, widget, drawer, hook
+from libqtile import layout, bar, widget, drawer, hook, dgroups
 
-import shlex
+import shlex, os
 
 ################################################################################
 ## Global
@@ -16,6 +16,37 @@ term = 'urxvt -e bash -c "tmux -q has-session && exec tmux attach-session -d || 
 main = None
 auto_fullscreen = True
 
+def detect_screens(qtile):
+    """
+    Detect if a new screen is plugged and reconfigure/restart qtile
+    """
+
+    def setup_monitors(action=None, device=None):
+        """
+        Add 1 group per screen
+        """
+
+        if action == "change":
+            # setup monitors with xrandr
+            # call("setup_screens")
+            lazy.restart()
+
+        nbr_screens = len(qtile.conn.pseudoscreens)
+        for i in xrange(0, nbr_screens-1):
+            groups.append(Group('h%sx' % (i+5), persist=False))
+    setup_monitors()
+
+    import pyudev
+
+    context = pyudev.Context()
+    monitor = pyudev.Monitor.from_netlink(context)
+    monitor.filter_by('drm')
+    monitor.enable_receiving()
+
+    # observe if the monitors change and reset monitors config
+    observer = pyudev.MonitorObserver(monitor, setup_monitors)
+    observer.start()
+
 @hook.subscribe.startup
 def runner():
     import subprocess
@@ -25,16 +56,22 @@ def runner():
 ################################################################################
 ## Groups
 ################################################################################
-dgroups_key_binder = None
 dgroups_app_rules = []
 
 groups = [
-    Group('', matches=[Match(wm_class=['Firefox'])]),
-    Group('', matches=[Match(wm_class=['Emacs'])]),
-    Group('', matches=[Match(title=['Terminal'])]),
-    Group('', matches=[Match(title=['Mozilla Thunderbird'])]),
-    Group('', matches=[Match(wm_class=['Xchat'])]),
-    Group('')
+    Group('', matches=[Match(wm_class=['Firefox'])], exclusive=True),
+    Group('', matches=[Match(wm_class=['Emacs'])], exclusive=True),
+    Group('', matches=[Match(title=['Terminal'])], exclusive=True),
+    Group(''),
+    Group('', matches=[Match(wm_class=['Nautilus'])], persist=False, init=False),
+    Group('', matches=[Match(title=['Mozilla Thunderbird'])], persist=False, init=False),
+    Group('', matches=[Match(title=['Kodi', 'VLC media player', 'FCEUX 2.2.2'])], exclusive=True, persist=False, init=False),
+    Group('', matches=[
+        Match(role=['gimp-toolbox']),
+        Match(role=['gimp-dock']),
+        Match(title=['GNU Image Manipulation Program'])
+    ], layout='gimp', persist=False, init=False),
+    #Group('', matches=[Match(wm_class=['Xchat'])]),
 ]
 
 
@@ -53,38 +90,52 @@ keys = [
     Key([mod, ctrl], 'Up', lazy.layout.rotate()),
     Key([alt], 'Tab', lazy.layout.next()),
     Key([mod], 'f', lazy.window.toggle_floating()),
-    Key([mod], 'Tab', lazy.to_next_screen()),
+    Key([mod], 'Tab', lazy.next_screen()),
     Key([mod, ctrl], 'q', lazy.shutdown()),
     Key([], 'F1', lazy.screen[0].togglegroup('')),
     Key([mod], 'Return', lazy.spawn(term)),
-    Key([mod, alt], 'Tab', lazy.next_layout()),
-    Key([mod], 'Prior', lazy.screen.prevgroup()),
-    Key([mod], 'Next', lazy.screen.nextgroup()),
+    Key([mod, shft], 'Tab', lazy.next_layout()),
+    Key([mod, alt], 'Tab', lazy.screen.next_group()),
+    Key([mod], 'Prior', lazy.screen.prev_group()),
+    Key([mod], 'Next', lazy.screen.next_group()),
     Key([alt], 'F4', lazy.window.kill()),
     Key([mod, ctrl], 'r', lazy.restart()),
     Key([mod], 'space', lazy.spawncmd('run')),
-    Key([mod], 'F12', lazy.window.toggle_fullscreen()),
+    Key([mod, ctrl], 'f', lazy.window.toggle_fullscreen()),
     Key([alt], 'grave', lazy.window.bring_to_front()),
     Key([], 'XF86MonBrightnessDown', lazy.spawn('sudo /home/filipe/local/bin/backlight dec')),
     Key([], 'XF86MonBrightnessUp', lazy.spawn('sudo /home/filipe/local/bin/backlight inc')),
     Key([], 'XF86AudioLowerVolume', lazy.spawn('amixer set Master playback 5-')),
     Key([], 'XF86AudioRaiseVolume', lazy.spawn('amixer set Master playback 5+')),
     Key([], 'XF86AudioMute', lazy.spawn('amixer set Master toggle')),
+    Key([mod], 'z', lazy.window.togroup()),
+    Key([mod], 'b', lazy.spawn('bash -c "/home/filipe/local/bin/backlight_off"')),
 ]
 
-for index, grp in enumerate(groups):
-    keys.extend([
-        Key([mod], str(index+1), lazy.group[grp.name].toscreen()), # switch to group
-        Key([mod, ctrl], str(index+1), lazy.window.togroup(grp.name)), # send to group
-    ])
+dgroups_key_binder = dgroups.simple_key_binder(mod)
+# for index, grp in enumerate(groups):
+#     keys.extend([
+#         Key([mod], str(index+1), lazy.group[grp.name].toscreen()), # switch to group
+#         Key([mod, ctrl], str(index+1), lazy.window.togroup(grp.name)), # send to group
+#     ])
 
 
 ################################################################################
 ## Layouts
 ################################################################################
+border_args = dict(
+    border_width=1,
+    border_focus='#00ccff',
+    border_normal='#0055aa'
+)
+
 layouts = [
-    layout.Max(margin=1),
-    layout.Stack(margin=1),
+    layout.Max(margin=1, **border_args),
+    layout.Stack(margin=1, **border_args),
+    layout.Slice(side='left', width=192, name='gimp', role='gimp-toolbox',
+         fallback=layout.Slice(side='right', width=256, role='gimp-dock',
+         fallback=layout.Tile(**border_args), **border_args)
+    ),
 ]
 
 floating_layout = layout.Floating(auto_float_types=[
@@ -93,7 +144,7 @@ floating_layout = layout.Floating(auto_float_types=[
     'splash',
     'dialog',
     'utility'
-], max_border_width=1, fullscreen_border_width=1)
+], max_border_width=1, fullscreen_border_width=1, **border_args)
 
 
 ################################################################################
@@ -120,7 +171,7 @@ screens = [
         top=bar.Bar(
             [
                 widget.GroupBox(
-                    invert_mouse_wheel=True,
+                    invert_mouse_wheel=False,
                     active='#00ccff', 
                     inactive='#0055aa', 
                     this_current_screen_border='#0077aa', 
@@ -146,9 +197,10 @@ screens = [
                 widget.Sep(),
                 widget.Systray(
                     **default_data
-                ),
-                widget.BatteryIcon(theme_path='/home/filipe/.config/qtile/battery/', **default_data),
-                #widget.Battery(**default_data),
+                )
+            ] + ([
+                widget.BatteryIcon(theme_path='/home/filipe/.config/qtile/battery/', **default_data)
+            ] if os.listdir('/sys/class/power_supply') else []) + [
                 widget.Volume(
                     theme_path='/home/filipe/.config/qtile/audio/', **default_data
                 ),
@@ -162,7 +214,7 @@ screens = [
         top=bar.Bar(
             [
                 widget.GroupBox(
-                    invert_mouse_wheel=True,
+                    invert_mouse_wheel=False,
                     active='#00ccff', 
                     inactive='#0055aa', 
                     this_current_screen_border='#0077aa', 
@@ -176,7 +228,9 @@ screens = [
                 widget.Sep(),
                 widget.WindowName(
                     width=bar.STRETCH, fontsize=14, **default_data
-                )
+                ),
+                widget.Sep(),
+                CloseWindow(fontsize=14, **default_data),
             ], 28, background='#2e3436'
         )
     )
