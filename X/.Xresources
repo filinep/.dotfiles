@@ -125,7 +125,7 @@ URxvt.cutchars:                       "\\ `\"\'()*;<>[]{|}&,=?@^\:"
 ! URxvt*url-launcher:                   string
 
 ! Tango color palette
-URxvt*background: #2e3436
+URxvt*background: #2e3441
 URxvt*foreground: #eeeeec
 URxvt*cursorColor: #8ae234
 ! foreground color for underline

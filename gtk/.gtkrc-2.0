@@ -23,7 +23,7 @@
 #   GtkWidget::focus_padding=0
 # }
 # class "GtkWidget" style "gtkcompact"
-gtk-theme-name="FlatStudioDark"
+gtk-theme-name="Arc-Dark"
 gtk-font-name = "DejaVu Sans 11"
 gtk-icon-theme-name = "Flattr"
 gtk-key-theme-name = "Emacs"

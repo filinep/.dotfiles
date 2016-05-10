@@ -62,15 +62,17 @@ groups = [
     Group('', matches=[Match(wm_class=['Firefox'])], exclusive=True),
     Group('', matches=[Match(wm_class=['Emacs'])], exclusive=True),
     Group('', matches=[Match(title=['Terminal'])], exclusive=True),
-    Group(''),
-    Group('', matches=[Match(wm_class=['Nautilus'])], persist=False, init=False),
+    Group('', matches=[Match(title=['calibre-gui'], wm_class=['libprs500'])], exclusive=True, persist=False, init=False),
+    Group('', matches=[Match(wm_class=['lyx', 'Lyx'])], exclusive=True, persist=False, init=False),
     Group('', matches=[Match(title=['Mozilla Thunderbird'])], persist=False, init=False),
-    Group('', matches=[Match(title=['Kodi', 'VLC media player', 'FCEUX 2.2.2'])], exclusive=True, persist=False, init=False),
+    Group('', matches=[Match(title=['Kodi', 'VLC media player', 'FCEUX 2.2.2'], wm_class=['vlc', 'Vlc'])], exclusive=True, persist=False, init=False),
     Group('', matches=[
         Match(role=['gimp-toolbox']),
         Match(role=['gimp-dock']),
         Match(title=['GNU Image Manipulation Program'])
     ], layout='gimp', persist=False, init=False),
+    Group('', matches=[Match(wm_class=['Nautilus'])], persist=False, init=False),
+    Group('', persist=False, init=False),
     #Group('', matches=[Match(wm_class=['Xchat'])]),
 ]
 
@@ -207,7 +209,7 @@ screens = [
                 widget.Clock(
                     format='%a %d %b %H:%M', fontsize=15, **default_data
                 )
-            ], 28, background='#2e3436'
+            ], 28, background='#2e3441'
         )
     ),
     Screen(
@@ -231,7 +233,7 @@ screens = [
                 ),
                 widget.Sep(),
                 CloseWindow(fontsize=14, **default_data),
-            ], 28, background='#2e3436'
+            ], 28, background='#2e3441'
         )
     )
 ]
