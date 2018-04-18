@@ -9,9 +9,13 @@ alias ls='ls -hF --color=always'
 
 alias openports='netstat --all --numeric --programs --inet --inet6'
 
-alias chat='urxvt -e weechat'
+alias em='emacsclient -c -nw'
+alias emacs='emacsclient -c'
 alias calc='python2 -i -c "from math import *; from matplotlib import pyplot as plot; from scipy import *"'
-alias ssh='TERM=rxvt ssh'
+#alias ssh='TERM=xterm
+if [ -f ~/.config/.alias ]; then
+    . ~/.config/.alias
+fi
 
 # Get color support for 'less'
 export LESS="--RAW-CONTROL-CHARS"
@@ -22,7 +26,7 @@ export LESS="--RAW-CONTROL-CHARS"
 # safety features
 alias cp='cp -i'
 alias mv='mv -i'
-alias rm='rm -I'                    # 'rm -i' prompts for every file
+alias rm='rm -I'
 alias ln='ln -i'
 alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
@@ -55,33 +59,29 @@ complete -cf sudo
 complete -cf man
 
 if [ -n "$DISPLAY" ]; then
-	BROWSER=firefox
+    BROWSER=firefox
 else
-	BROWSER=links
+    BROWSER=links
 fi
 ALTERNATE_EDITOR=""
-EDITOR=emacs
-PAGER=less
 
 export BROWSER
-export EDITOR
-export PAGER
-
-# Python stuff
-export PYTHONDOCS=/usr/share/doc/python2/html/
+export EDITOR=emacs
+export PAGER=less
 
 # Java stuff
 export _JAVA_AWT_WM_NONREPARENTING=1
-export SCALA_HOME=/usr/share/scala
-
-export PATH=~/local/bin:$PATH
+export QT_QPA_PLATFORMTHEME=gtk2
+export QT_STYLE_OVERRIDE=GTK+
+export APPENGINE_SDK_HOME=/opt/google-appengine-java
+export PATH=~/local/bin:$PATH:/opt/google-appengine-java/bin
 
 if [ -f ~/.proxy ]; then
     . ~/.proxy
 fi
 
+unset SSH_ASKPASS
+
 clear
 ~/.dotfiles/bash/space_invaders
 
-export QT_STYLE_OVERRIDE=GTK+
-unset SSH_ASKPASS

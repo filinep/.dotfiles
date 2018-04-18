@@ -1,5 +1,5 @@
-URxvt.perl-ext-common:      default,clipboard,url-select,keyboard-select
-URxvt.url-select.launcher:  firefox
+URxvt.perl-ext-common:      default,clipboard,url-select,keyboard-select,resize-font
+URxvt.url-select.launcher:  /usr/bin/xdg-open
 URxvt.url-select.underline: true
 URxvt.url-select.button:    1
 URxvt.keysym.M-w:           perl:clipboard:copy
@@ -9,10 +9,10 @@ URxvt.clipboard.pastecmd:   xsel -ob
 URxvt.keysym.M-Escape:      perl:keyboard-select:activate
 URxvt.keysym.M-s:           perl:keyboard-select:search
 
-URxvt.keysym.Control-Up:    \033[1;5A
-URxvt.keysym.Control-Down:  \033[1;5B
-URxvt.keysym.Control-Left:  \033[1;5D
-URxvt.keysym.Control-Right: \033[1;5C
+! URxvt.keysym.Control-Up:    \033[1;5A
+! URxvt.keysym.Control-Down:  \033[1;5B
+! URxvt.keysym.Control-Left:  \033[1;5D
+! URxvt.keysym.Control-Right: \033[1;5C
 
 URxvt*termName:                       screen-256color
 ! URxvt*geometry:                       geometry
@@ -61,7 +61,8 @@ URxvt*cursorBlink:                    true
 ! URxvt*pointerColor2:                  color
 ! URxvt*borderColor:                    color
 ! URxvt*iconFile:                       file
-URxvt*font: 				          xft:DejaVu Sans Mono:pixelsize=15:antialias=true:hinting=true
+! URxvt*font:                          xft:DejaVu Sans Mono:pixelsize=15:antialias=true:hinting=true
+URxvt*font:                            xft:Roboto Mono:pixelsize=16:antialias=true:hinting=true,xft:FontAwesome:pixelsize=15:antialias=true:hinting=true,xft:DejaVu Sans Mono:pixelsize=15:antialias=true:hinting=true
 ! URxvt*boldFont:                       fontname
 ! URxvt*italicFont:                     fontname
 ! URxvt*boldItalicFont:                 fontname
@@ -92,14 +93,14 @@ URxvt*letterSpace:                    -1
 ! URxvt*modifier:                       modifier
 URxvt.cutchars:                       "\\ `\"\'()*;<>[]{|}&,=?@^\:"
 ! URxvt*answerbackString:               string
-! URxvt*secondaryScreen:                boolean
-! URxvt*secondaryScroll:                boolean
+URxvt*secondaryScreen:                1
+URxvt*secondaryScroll:                0
 ! URxvt*perl-lib:                       string
 ! URxvt*perl-eval:                      perl-eval
 ! URxvt*perl-ext-common:                string
 ! URxvt*perl-ext:                       string
-! URxvt*iso14755:                       boolean
-! URxvt*iso14755_52:                    boolean
+URxvt*iso14755:                       false
+URxvt*iso14755_52:                    false
 ! URxvt*xrm:                            string
 ! URxvt*keysym.sym:                     keysym
 ! URxvt*background.border:              boolean

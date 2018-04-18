@@ -1,57 +1,40 @@
 # -*- coding: utf-8 -*-
-from libqtile.config import Key, Screen, Group, Match, Drag, Click
+from libqtile.config import Key, Screen, Group, Match, Drag, Click, ScratchPad, DropDown
 from libqtile.command import lazy
 from libqtile.widget import base
 from libqtile import layout, bar, widget, drawer, hook, dgroups
+from libqtile.log_utils import logger
 
-import shlex, os
+import ConfigParser
+import os, requests
+
+################################################################################
+## Colours
+################################################################################
+foreground = '#00ccff'
+background = '#2e3441'
+border_focus = '#00ccff'
+border_normal = '#0055aa'
+active = '#00ccff'
+inactive = '#0055aa'
+this_current_screen_border = '#0077aa'
+other_screen_border = '#555555'
+this_screen_border = '#202020'
 
 ################################################################################
 ## Global
 ################################################################################
-def log(s):
-    screens[0].qtile.log.error(s)
+config = ConfigParser.RawConfigParser()
+config.read('/home/filipe/.config/.vars')
 
 term = 'urxvt -e bash -c "tmux -q has-session && exec tmux attach-session -d || exec tmux new-session"'
 main = None
 auto_fullscreen = True
 
-def detect_screens(qtile):
-    """
-    Detect if a new screen is plugged and reconfigure/restart qtile
-    """
-
-    def setup_monitors(action=None, device=None):
-        """
-        Add 1 group per screen
-        """
-
-        if action == "change":
-            # setup monitors with xrandr
-            # call("setup_screens")
-            lazy.restart()
-
-        nbr_screens = len(qtile.conn.pseudoscreens)
-        for i in xrange(0, nbr_screens-1):
-            groups.append(Group('h%sx' % (i+5), persist=False))
-    setup_monitors()
-
-    import pyudev
-
-    context = pyudev.Context()
-    monitor = pyudev.Monitor.from_netlink(context)
-    monitor.filter_by('drm')
-    monitor.enable_receiving()
-
-    # observe if the monitors change and reset monitors config
-    observer = pyudev.MonitorObserver(monitor, setup_monitors)
-    observer.start()
-
 @hook.subscribe.startup
 def runner():
     import subprocess
     subprocess.Popen(shlex.split(term))
-
 
 ################################################################################
 ## Groups
@@ -63,17 +46,17 @@ groups = [
     Group('', matches=[Match(wm_class=['Emacs'])], exclusive=True),
     Group('', matches=[Match(title=['Terminal'])], exclusive=True),
     Group('', matches=[Match(title=['calibre-gui'], wm_class=['libprs500'])], exclusive=True, persist=False, init=False),
-    Group('', matches=[Match(wm_class=['lyx', 'Lyx'])], exclusive=True, persist=False, init=False),
-    Group('', matches=[Match(title=['Mozilla Thunderbird'])], persist=False, init=False),
+    Group('', matches=[Match(wm_class=['lyx', 'Lyx'])], exclusive=True, persist=False, init=False),
+    Group('', matches=[Match(wm_class=['evince', 'Evince'])], exclusive=True, persist=False, init=False),
+    Group('', matches=[Match(title=['Zeal'])], exclusive=True, persist=False, init=False),
     Group('', matches=[Match(title=['Kodi', 'VLC media player', 'FCEUX 2.2.2'], wm_class=['vlc', 'Vlc'])], exclusive=True, persist=False, init=False),
     Group('', matches=[
         Match(role=['gimp-toolbox']),
         Match(role=['gimp-dock']),
         Match(title=['GNU Image Manipulation Program'])
-    ], layout='gimp', persist=False, init=False),
-    Group('', matches=[Match(wm_class=['Nautilus'])], persist=False, init=False),
+    ], exclusive=True, persist=False, init=False),
+    Group('', matches=[Match(wm_class=['Nautilus'])], exclusive=True, persist=False, init=False),
     Group('', persist=False, init=False),
-    #Group('', matches=[Match(wm_class=['Xchat'])]),
 ]
 
 
@@ -97,7 +80,6 @@ keys = [
     Key([], 'F1', lazy.screen[0].togglegroup('')),
     Key([mod], 'Return', lazy.spawn(term)),
     Key([mod, shft], 'Tab', lazy.next_layout()),
-    Key([mod, alt], 'Tab', lazy.screen.next_group()),
     Key([mod], 'Prior', lazy.screen.prev_group()),
     Key([mod], 'Next', lazy.screen.next_group()),
     Key([alt], 'F4', lazy.window.kill()),
@@ -107,20 +89,18 @@ keys = [
     Key([alt], 'grave', lazy.window.bring_to_front()),
     Key([], 'XF86MonBrightnessDown', lazy.spawn('sudo /home/filipe/local/bin/backlight dec')),
     Key([], 'XF86MonBrightnessUp', lazy.spawn('sudo /home/filipe/local/bin/backlight inc')),
-    Key([], 'XF86AudioLowerVolume', lazy.spawn('amixer set Master playback 5-')),
-    Key([], 'XF86AudioRaiseVolume', lazy.spawn('amixer set Master playback 5+')),
-    Key([], 'XF86AudioMute', lazy.spawn('amixer set Master toggle')),
+    Key([], 'XF86AudioLowerVolume', lazy.spawn('sh -c "pactl set-sink-mute 0 false ; pactl set-sink-volume 0 -5%"')),
+    Key([], 'XF86AudioRaiseVolume', lazy.spawn('sh -c "pactl set-sink-mute 0 false ; pactl set-sink-volume 0 +5%"')),
+    Key([], 'XF86AudioMute', lazy.spawn('pactl set-sink-mute 0 toggle')),
     Key([mod], 'z', lazy.window.togroup()),
     Key([mod], 'b', lazy.spawn('bash -c "/home/filipe/local/bin/backlight_off"')),
+    Key([mod, alt], "Down", lazy.layout.down()),
+    Key([mod, alt], "Up", lazy.layout.up()),
+    Key([mod, alt], "Left", lazy.layout.client_to_next()),
+    Key([mod, alt], "Right", lazy.layout.client_to_previous()),
 ]
 
 dgroups_key_binder = dgroups.simple_key_binder(mod)
-# for index, grp in enumerate(groups):
-#     keys.extend([
-#         Key([mod], str(index+1), lazy.group[grp.name].toscreen()), # switch to group
-#         Key([mod, ctrl], str(index+1), lazy.window.togroup(grp.name)), # send to group
-#     ])
-
 
 ################################################################################
 ## Layouts
@@ -133,11 +113,7 @@ border_args = dict(
 
 layouts = [
     layout.Max(margin=1, **border_args),
-    layout.Stack(margin=1, **border_args),
-    layout.Slice(side='left', width=192, name='gimp', role='gimp-toolbox',
-         fallback=layout.Slice(side='right', width=256, role='gimp-dock',
-         fallback=layout.Tile(**border_args), **border_args)
-    ),
+    layout.Stack(margin=1, **border_args)
 ]
 
 floating_layout = layout.Floating(auto_float_types=[
@@ -163,76 +139,94 @@ class CloseWindow(base._TextBox):
         if button == 1:
             self.qtile.currentWindow.kill()
 
-default_data = dict(
-    foreground='#00ccff',
-    font='FontAwesome'
+class Bitcoin(base.ThreadedPollText):
+    orientations = base.ORIENTATION_HORIZONTAL
+
+    keyid = config.get('LUNO', 'KEY')
+    secret = config.get('LUNO', 'SECRET')
+
+    ticker_url  = "https://api.mybitx.com/api/1/tickers"
+    balance_url = "https://api.mybitx.com/api/1/balance"
+
+    defaults = [
+        ('update_interval', 60, 'The update interval.'),
+    ]
+
+    def __init__(self, **config):
+        base.ThreadedPollText.__init__(self, **config)
+        self.add_defaults(Bitcoin.defaults)
+
+    def draw(self):
+        base.ThreadedPollText.draw(self)
+
+    def poll(self):
+        try:
+            tickers = requests.get(self.ticker_url).json()
+            ask_xbt = [float(i['last_trade']) for i in tickers['tickers'] if i['pair'] == 'XBTZAR'][0]
+
+            balances = requests.get(self.balance_url, auth=(self.keyid, self.secret)).json()['balance']
+            xbt = sum([float(i['balance']) for i in balances if i['asset'] == 'XBT'])
+            zar = sum([float(i['balance']) for i in balances if i['asset'] == 'ZAR'])
+            bch = sum([float(i['balance']) for i in balances if i['asset'] == 'BCH'])
+            eth = sum([float(i['balance']) for i in balances if i['asset'] == 'ETH'])
+
+            return "ETH: %.4f, BCH: %.2f, XBT: %.6f, ZAR: %.2f, Price: %.0f" % (eth, bch, xbt, xbt*ask_xbt + zar, ask_xbt)
+        except Exception as e:
+            return str(e)[:50]
+
+widget_defaults = dict(
+    foreground=foreground,
+    font='FontAwesome',
+    fontsize=14
 )
+
+def groupbox(): return widget.GroupBox(
+        invert_mouse_wheel=False,
+        active=active, 
+        inactive=inactive, 
+        this_current_screen_border=this_current_screen_border, 
+        other_screen_border=other_screen_border, 
+        this_screen_border=this_screen_border, 
+        fontsize=18, 
+        highlight_method='block',
+        urgent_alert_method='text'
+)
+
+def sep(): return widget.Sep()
+
+def battery(): return [
+        widget.BatteryIcon(theme_path='/home/filipe/.config/qtile/battery/')
+] if os.listdir('/sys/class/power_supply') else []
 
 screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.GroupBox(
-                    invert_mouse_wheel=False,
-                    active='#00ccff', 
-                    inactive='#0055aa', 
-                    this_current_screen_border='#0077aa', 
-                    other_screen_border='#555555', 
-                    this_screen_border='#202020', 
-                    fontsize=18, 
-                    highlight_method='block',
-                    urgent_alert_method='text',
-                    **default_data
-                ),
-                widget.Sep(),
-                widget.WindowName(
-                    width=bar.STRETCH, fontsize=14, **default_data
-                ),
-                widget.Prompt(
-                    fontsize=14, **default_data
-                ),
-                widget.Notify(
-                    fontsize=14, **default_data
-                ),
-                widget.Sep(),
-                CloseWindow(fontsize=14, **default_data),
-                widget.Sep(),
-                widget.Systray(
-                    **default_data
-                )
-            ] + ([
-                widget.BatteryIcon(theme_path='/home/filipe/.config/qtile/battery/', **default_data)
-            ] if os.listdir('/sys/class/power_supply') else []) + [
-                widget.Volume(
-                    theme_path='/home/filipe/.config/qtile/audio/', **default_data
-                ),
-                widget.Clock(
-                    format='%a %d %b %H:%M', fontsize=15, **default_data
-                )
+                groupbox(),
+                sep(),
+                widget.WindowName(width=bar.STRETCH),
+                widget.Prompt(),
+                widget.Notify(),
+                sep(),
+                Bitcoin(),
+                sep(),
+                CloseWindow(),
+                sep(),
+                widget.Systray()
+            ] + battery() + [
+                widget.Volume(theme_path='/home/filipe/.config/qtile/audio/'),
+                widget.Clock(format='%a %d %b %H:%M')
             ], 28, background='#2e3441'
         )
     ),
     Screen(
         top=bar.Bar(
             [
-                widget.GroupBox(
-                    invert_mouse_wheel=False,
-                    active='#00ccff', 
-                    inactive='#0055aa', 
-                    this_current_screen_border='#0077aa', 
-                    other_screen_border='#555555', 
-                    this_screen_border='#202020', 
-                    fontsize=18, 
-                    highlight_method='block',
-                    urgent_alert_method='text',
-                    **default_data
-                ),
-                widget.Sep(),
-                widget.WindowName(
-                    width=bar.STRETCH, fontsize=14, **default_data
-                ),
-                widget.Sep(),
-                CloseWindow(fontsize=14, **default_data),
+                groupbox(),
+                sep(),
+                widget.WindowName(width=bar.STRETCH),
+                sep(),
+                CloseWindow()
             ], 28, background='#2e3441'
         )
     )
